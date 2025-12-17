@@ -36,3 +36,22 @@ def create_equity_prompt() -> ChatPromptTemplate:
     )
     image_payload = [{"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,{image_data}"}}]
     return ChatPromptTemplate.from_messages([("system", system_prompt), ("user", image_payload)])
+
+def create_cash_flow_prompt() -> ChatPromptTemplate:
+    """
+    Specialized Prompt for Statement of Cash Flows.
+    Strictly 3 columns: Description, Current Year, Previous Year.
+    Emphasizes capturing ALL rows (Investing, Financing, Operating).
+    """
+    system_prompt = (
+        "Analyze the provided image and extract the 'Statement of Cash Flows' into a **Markdown Table**.\n"
+        "The table must have exactly 3 columns: | Description | Current Year | Previous Year |.\n"
+        "**CRITICAL RULES:**\n"
+        "1. **Capture EVERY Row**: Extract all line items, including 'Investing activities' (e.g., Purchase of PPE), 'Financing activities', and 'Payment of...' rows. Do not skip lines that seem minor.\n"
+        "2. **Structure**: | Description | Current Amount | Previous Amount |\n"
+        "3. **No Notes**: There is no 'Note' column. Do not create one.\n"
+        "4. **Data Fidelity**: Copy parentheses '()' for negatives and dashes '-' exactly.\n"
+        "5. **Headers**: Preserve section headers (like 'Operating activities') even if they have no amounts."
+    )
+    image_payload = [{"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,{image_data}"}}]
+    return ChatPromptTemplate.from_messages([("system", system_prompt), ("user", image_payload)])

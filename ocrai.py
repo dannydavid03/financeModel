@@ -6,7 +6,7 @@ from langchain_core.runnables.utils import Input, Output
 from langchain_ollama import ChatOllama
 from PIL import Image
 
-from prompt import create_ocr_prompt, create_equity_prompt
+from prompt import create_ocr_prompt, create_equity_prompt, create_cash_flow_prompt
 
 class OcrChain(Runnable[Input, Output]):
     def __init__(self, model: str, base_url: str, temperature: float, mode: str = "fixed"):
@@ -17,6 +17,8 @@ class OcrChain(Runnable[Input, Output]):
         )
         if mode == "equity":
             self._ocr_prompt = create_equity_prompt()
+        elif mode == "cash":
+            self._ocr_prompt = create_cash_flow_prompt()
         else:
             self._ocr_prompt = create_ocr_prompt()
 
@@ -36,7 +38,7 @@ class OcrChain(Runnable[Input, Output]):
                 
             w, h = file.size
             
-            # INCREASED UPSCALING: Target 2000px width for better line separation
+            # Target 2000px width for better text resolution
             TARGET_WIDTH = 2000
             if w < TARGET_WIDTH:
                 scale_factor = TARGET_WIDTH / w
@@ -44,7 +46,6 @@ class OcrChain(Runnable[Input, Output]):
                 file = file.resize(new_size, Image.Resampling.LANCZOS)
                 
             buf = io.BytesIO()
-            # Use PNG for lossless clarity on text edges
             file.save(buf, format="PNG") 
             return base64.b64encode(buf.getvalue()).decode("utf-8")
             
